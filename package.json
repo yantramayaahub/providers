@@ -47,7 +47,8 @@
     "lint:report": "eslint --ext .ts,.js --output-file eslint_report.json --format json src/",
     "preinstall": "npx -y only-allow pnpm",
     "prepare": "pnpm run build",
-    "prepublishOnly": "pnpm test && pnpm run lint"
+    "prepublishOnly": "pnpm test && pnpm run lint",
+    "start:api": "vite-node ./src/api-server/server.ts"
   },
   "devDependencies": {
     "@nabla/vite-plugin-eslint": "^2.0.6",
