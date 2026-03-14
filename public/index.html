@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Providers API Docs & Test Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #f3f4f6; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .status-success { color: #10b981; }
+    .status-fail { color: #ef4444; }
+  </style>
+</head>
+<body class="text-gray-800 antialiased p-6">
+  <div class="max-w-6xl mx-auto space-y-8">
+    <header class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Providers API</h1>
+        <p class="text-gray-600">A Cloudflare worker API providing streaming URLs for movies and TV shows using TMDB IDs.</p>
+      </div>
+      <div class="space-x-4">
+        <a href="#docs" class="text-blue-500 hover:underline">Docs</a>
+        <a href="#test" class="text-blue-500 hover:underline">Test</a>
+        <a href="#env" class="text-blue-500 hover:underline font-bold">Provider Env</a>
+      </div>
+    </header>
+
+    <div id="docs" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Documentation -->
+      <section class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">API Documentation</h2>
+        <div class="space-y-4 text-sm">
+          <div>
+            <h3 class="font-semibold text-blue-600">GET /api/movie</h3>
+            <p class="mb-1 text-gray-600">Fetch stream for a movie. Optional <b>sourceId</b>.</p>
+            <code class="block bg-gray-100 p-2 rounded text-xs">/api/movie?tmdbId=299534&sourceId=superstream</code>
+          </div>
+          <div>
+            <h3 class="font-semibold text-blue-600">GET /api/show</h3>
+            <p class="mb-1 text-gray-600">Fetch stream for a TV show episode. Optional <b>sourceId</b>.</p>
+            <code class="block bg-gray-100 p-2 rounded text-xs">/api/show?tmdbId=1399&season=1&episode=1&sourceId=superstream</code>
+          </div>
+          <div>
+            <h3 class="font-semibold text-green-600 font-bold">GET /api/all</h3>
+            <p class="mb-1 text-gray-600">Fetch results from ALL providers. Includes <b>flags: ["cors-allowed"]</b>.</p>
+            <code class="block bg-gray-100 p-2 rounded text-xs">/api/all?tmdbId=299534&type=movie</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Test Area -->
+      <section id="test" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">Quick Test</h2>
+        <div class="space-y-4">
+          <div class="flex space-x-2">
+            <button onclick="testApi('/api/movie?tmdbId=299534&title=Avengers')" class="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm transition">Test Movie (Avengers)</button>
+            <button onclick="testApi('/api/show?tmdbId=1399&season=1&episode=1')" class="flex-1 px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-sm transition">Test Show (GoT)</button>
+          </div>
+          <div class="pt-4 border-t">
+             <div class="grid grid-cols-2 gap-2 mb-2">
+              <select id="manualType" class="border rounded p-2 text-sm" onchange="toggleShowInputs()">
+                <option value="movie">Movie</option>
+                <option value="show">TV Show</option>
+              </select>
+              <input type="text" id="manualTmdb" placeholder="Custom TMDB ID" class="border rounded p-2 text-sm">
+            </div>
+            <div id="showInputs" class="grid grid-cols-2 gap-2 mb-2 hidden">
+              <input type="number" id="manualSeason" placeholder="Season" value="1" class="border rounded p-2 text-sm">
+              <input type="number" id="manualEpisode" placeholder="Episode" value="1" class="border rounded p-2 text-sm">
+            </div>
+            <button onclick="runManualTest()" class="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm transition font-semibold">Run Specific Check</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Provider Testing Environment -->
+    <section id="env" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-700">Provider Testing Environment</h2>
+          <p id="envTargetDisplay" class="text-sm text-gray-500">Targeting: <span class="font-bold text-gray-700">Avengers: Endgame (299534)</span></p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="runEnvTest('movie', '299534', 'Avengers: Endgame')" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-bold shadow-sm transition">TEST MOVIE (AVENGERS)</button>
+          <button onclick="runEnvTest('show', '1399', 'Game of Thrones')" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 text-xs font-bold shadow-sm transition">TEST SHOW (GOT)</button>
+          <button onclick="runEnvTestCustom()" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-xs font-bold shadow-sm transition">TEST CUSTOM TMDB</button>
+        </div>
+      </div>
+      
+      <div id="envResults" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-auto p-2 bg-gray-50 rounded">
+        <div class="col-span-full text-center py-10 text-gray-400">Select a test category above to run concurrent provider checks.</div>
+      </div>
+    </section>
+
+    <!-- Detailed Response -->
+    <section class="bg-gray-900 text-green-400 p-4 rounded-lg shadow-inner overflow-hidden flex flex-col h-80">
+      <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
+        <h3 class="font-mono text-sm font-bold text-gray-300">Terminal Output</h3>
+        <span id="loading" class="hidden loader border-gray-400"></span>
+      </div>
+      <pre id="output" class="text-xs overflow-auto font-mono whitespace-pre-wrap flex-1 leading-relaxed">Waiting for action...</pre>
+    </section>
+  </div>
+
+  <script>
+    function toggleShowInputs() {
+      const type = document.getElementById('manualType').value;
+      const showInputs = document.getElementById('showInputs');
+      showInputs.classList.toggle('hidden', type !== 'show');
+    }
+
+    async function testApi(url) {
+      const output = document.getElementById('output');
+      const loading = document.getElementById('loading');
+      output.innerText = `> GET ${url}\n> Fetching...`;
+      loading.classList.remove('hidden');
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        output.innerText += `\n> Status: ${res.status}\n\n` + JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.innerText += `\n> Error: ${err.message}`;
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    function runManualTest() {
+      const type = document.getElementById('manualType').value;
+      const tmdbId = document.getElementById('manualTmdb').value;
+      if (!tmdbId) return alert('Enter TMDB ID');
+      const url = type === 'movie' ? `/api/movie?tmdbId=${tmdbId}` : `/api/show?tmdbId=${tmdbId}&season=${document.getElementById('manualSeason').value}&episode=${document.getElementById('manualEpisode').value}`;
+      testApi(url);
+    }
+
+    async function runEnvTestCustom() {
+      const tmdbId = document.getElementById('manualTmdb').value;
+      const type = document.getElementById('manualType').value;
+      if (!tmdbId) return alert('Enter a custom TMDB ID in the Manual Test section first.');
+      runEnvTest(type, tmdbId, `Custom ${type} (TMDB: ${tmdbId})`);
+    }
+
+    async function runEnvTest(type, tmdbId, title) {
+      const envResults = document.getElementById('envResults');
+      const targetDisplay = document.getElementById('envTargetDisplay');
+      
+      targetDisplay.innerHTML = `Targeting: <span class="font-bold text-gray-700">${title} (${tmdbId})</span>`;
+      envResults.innerHTML = '<div class="col-span-full text-center py-10"><span class="loader border-gray-400"></span><span class="ml-2 text-gray-500">Polling all providers...</span></div>';
+      
+      let url = `/api/all?tmdbId=${tmdbId}&type=${type}`;
+      if (type === 'show') {
+         url += `&season=${document.getElementById('manualSeason').value || 1}&episode=${document.getElementById('manualEpisode').value || 1}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        envResults.innerHTML = '';
+        if (data.results) {
+          data.results.forEach(res => {
+            const card = document.createElement('div');
+            card.className = 'bg-white p-3 rounded shadow-sm border border-gray-200 flex flex-col justify-between';
+            const statusClass = res.success && res.result ? 'status-success' : 'status-fail';
+            const statusText = res.success ? (res.result ? 'FOUND' : 'NOT FOUND') : 'ERROR';
+            
+            card.innerHTML = `
+              <div class="flex justify-between items-start mb-2">
+                <span class="font-bold text-xs truncate mr-2" title="${res.name}">${res.name}</span>
+                <span class="text-[10px] font-mono text-gray-400">${res.sourceId}</span>
+              </div>
+              <div class="flex items-center justify-between mt-auto">
+                <span class="text-[10px] font-bold ${statusClass}">${statusText}</span>
+                <button onclick="showDetails(${JSON.stringify(res).replace(/"/g, '&quot;')})" class="text-[10px] text-blue-500 hover:underline">Details</button>
+              </div>
+            `;
+            envResults.appendChild(card);
+          });
+        }
+      } catch (err) {
+        envResults.innerHTML = `<div class="col-span-full text-center py-10 text-red-500">Failed: ${err.message}</div>`;
+      }
+    }
+
+    window.showDetails = function(data) {
+      document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+      document.getElementById('output').scrollIntoView();
+    };
+  </script>
+</body>
+</html>

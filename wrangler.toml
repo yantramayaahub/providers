@@ -1,0 +1,9 @@
+name = "projectproviders"
+main = "src/api.ts"
+compatibility_date = "2024-03-20"
+
+[build]
+command = "npm run build" # Optional if wrangler builds it
+
+[site]
+bucket = "./public"
