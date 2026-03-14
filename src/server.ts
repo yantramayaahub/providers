@@ -9,7 +9,7 @@ import {
   targets,
   MovieMedia,
   ShowMedia,
-} from './index';
+} from './index.js';
 
 const app = new Hono();
 
