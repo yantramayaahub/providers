@@ -35,7 +35,7 @@
   },
   "homepage": "https://p-stream.github.io/providers/",
   "scripts": {
-    "start": "node lib/server.js",
+    "start": "node lib/src/server.js",
     "build": "vite build && tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "cli": "vite-node ./src/dev-cli/index.ts",
     "test": "vitest run",
